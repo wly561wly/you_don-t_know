@@ -65,86 +65,56 @@ module control_module(
 
     assign cnt_5s=(switchtime[23:20]*10+switchtime[19:16])*3600+(switchtime[15:12]*10+switchtime[11:8])*60+(switchtime[7:4]*10+switchtime[3:0]);
 
+    wire [23:0]new_nowtime;
+    //nowtime_control
+    nowtime_control nowtime_control(
+        .clk(clk),
+        .clkout(clkout),
+        .state(state),
+        .rst(rst),
+        .nowtime(nowtime),
+        .save_nowtime_yet(save_nowtime_yet),
+        .save_nowtime(save_nowtime),
+        .new_nowtime(new_nowtime)
+    );
+
+    always @(new_nowtime)begin
+        nowtime<=new_nowtime;
+    end
+
+    wire [23:0]new_worktime;
+    //worktime_control
+    worktime_control worktime_control(
+        .clkout(clkout),
+        .rst(rst),
+        .state(state),
+        .suspend(suspend),
+        .recover_yet(recover_yet),
+        .worktime(worktime),
+        .clean_worktime_yet(clean_worktime_yet),
+        .new_worktime(new_worktime)
+    );
+    always @(new_worktime)begin
+        worktime<=new_worktime;
+    end
+
     always @(posedge clkout,negedge rst)begin
         if(!rst)begin
-            nowtime<=24'b0;
-            worktime<=24'b0;
             countdown_clean<=12'b0;
             countdown_storm<=8'b0;
         end
         else begin
-            if(state[6]==1'b1)begin
-                if(nowtime[3:0]==4'b1001)begin //second ones
-                    if(nowtime[7:4]==4'b0101)begin //second tens
-                        if(nowtime[11:8]==4'b1001)begin //minute ones
-                            if(nowtime[15:12]==4'b0101)begin  //minute tens
-                                if(nowtime[19:16]==4'b1001)begin //hour ones ,9+1=10
-                                    nowtime[23:20]<=nowtime[23:20]+4'b0001;
-                                    nowtime[19:0]<=20'b00000000000000000000;
-                                end
-                                else begin
-                                    if(nowtime[23:20]==4'b0010 && nowtime[19:16]==4'b0011) //23+1=0
-                                        nowtime=24'b000000000000000000000000;
-                                    else begin
-                                        nowtime[19:16]<=nowtime[19:16]+4'b0001;
-                                        nowtime[15:0]<=16'b0000000000000000;
-                                    end
-                                end
-                            end
-                            else begin
-                                nowtime[15:12]<=nowtime[15:12]+4'b0001;
-                                nowtime[11:0]<=12'b000000000000;
-                            end
-                        end
-                        else begin
-                            nowtime[11:8]<=nowtime[11:8]+4'b0001;
-                            nowtime[7:0]<=8'b00000000;
-                        end
-                    end
-                    else begin
-                        nowtime[3:0]<=4'b0000;
-                        nowtime[7:4]<=nowtime[7:4]+4'b0001;
-                    end
-                end
-                else nowtime[3:0]<=nowtime[3:0]+4'b0001;
-            end
-            else begin
-                nowtime<=24'b000000000000000000000000;
-                worktime<=0;
+            if(state[6]==1'b0)begin
                 countdown_clean<=0;
                 countdown_storm<=0;
             end
 
-            // nowtimes
-            if(save_nowtime_yet==1'b1)begin
-                nowtime<=save_nowtime;
-            end
-
             if(recover_yet==1'b1)begin
-                worktime<=24'b0;
                 countdown_clean<=12'b0;
                 countdown_storm<=8'b0;
             end
             else begin
                 //suspend,countdown_storm,countdown_clean
-                if(suspend==1'b1)begin
-                    worktime[3:0]<=worktime[3:0]+4'b0001;
-                    if(worktime[3:0]==4'b1010)begin
-                        worktime[3:0]<=8'b0000;
-                        worktime[7:4]<=worktime[7:4]+4'b0001;
-                    end
-                    if(worktime[7:0]==8'b01100000)begin
-                        worktime[7:0]<=8'b00000000;
-                        worktime[15:8]<=worktime[15:8]+8'b00000001;
-                        if(worktime[15:8]==8'b01100000)begin
-                            worktime[15:8]<=8'b00000000;
-                            worktime[23:16]<=worktime[23:16]+8'b00000001;
-                        end
-                    end
-                end
-                else if(clean_worktime_yet==1'b1)begin
-                    worktime<=0;
-                end
                 //counter time
                 if(countdown_storm!=0)begin
                     if(state==`THREE || state==`EXIT_STROM)begin
@@ -203,7 +173,7 @@ module control_module(
             save_remindtime_yet<=1'b0;
             save_switchtime_yet<=1'b0;
             suspend<=1'b0;
-            sign<={nowtime,`SHOW_STAN};
+            sign<={new_nowtime,`SHOW_STAN};
         end else if(state[6] && sign_pos_W && switch_P)begin
             clkout<=0;
             recover_yet<=1'b1;
@@ -218,7 +188,7 @@ module control_module(
             save_remindtime_yet<=1'b0;
             save_switchtime_yet<=1'b0;
             suspend<=1'b0;
-            sign<={nowtime,`SHOW_STAN};
+            sign<={new_nowtime,`SHOW_STAN};
         end else begin
 
             // Long push to turn pn/off
@@ -274,7 +244,7 @@ module control_module(
                 nxt_state<=`SHUTDOWN;
                 clkout<=1'b0;
                 cnt_D<=re_cnt;
-            end else if(sign_pos_D && switch_P) begin //to complete
+            end else if( state[6]==1'b1 && sign_pos_D && switch_P) begin //to complete
                     buttom_effect[0]<=1'b1;
                     cnt_D<=re_cnt; // Clear cnt_B
             end 
@@ -288,7 +258,7 @@ module control_module(
             end
 
             //recover
-            if(recover_yet==1'b1 && worktime==0 && countdown_clean==12'b0 && countdown_storm==8'b0)begin
+            if(recover_yet==1'b1 && new_worktime==0 && countdown_clean==12'b0 && countdown_storm==8'b0)begin
                 recover_yet<=1'b0;
             end
 
@@ -296,17 +266,17 @@ module control_module(
             if(clean_worktime_yet==1'b0 && (sign_pos_S && switch_P))begin
                 clean_worktime_yet<=1'b1;
             end
-            else if(clean_worktime_yet==1'b1 && worktime==0)begin
+            else if(clean_worktime_yet==1'b1 && new_worktime==0)begin
                 clean_worktime_yet<=1'b0;
             end
 
             //save_nowtime
-            else if(save_nowtime==nowtime && save_nowtime_yet==1'b1)begin
+            else if(save_nowtime==new_nowtime && save_nowtime_yet==1'b1)begin
                 save_nowtime_yet<=1'b0;
             end
 
             if(buttom_effect[0]==1'b1 && switch_P )begin
-                sign<={nowtime,(cnt_5s-cnt_D)/10*16+(cnt_5s-cnt_D)%10};
+                sign<={new_nowtime,(cnt_5s-cnt_D)/10*16+(cnt_5s-cnt_D)%10};
             end
             else begin
                 case(state)
@@ -314,7 +284,7 @@ module control_module(
                         clkout<=1'b1;
                         storm_once<=1'b0;
                         suspend<=1'b0;
-                        sign<={nowtime,`SHOW_STAN};
+                        sign<={new_nowtime,`SHOW_STAN};
                         if(sign_pos_A && switch_P)begin
                             buttom_effect[1]<=1'b1;
                             cnt_A<=re_cnt;
@@ -331,7 +301,7 @@ module control_module(
                     `STANDBY:begin
                         suspend<=1'b0;
                         if(save_nowtime_yet==1'b1) sign<={save_nowtime,`SHOW_STAN};
-                        else sign<={nowtime,`SHOW_STAN};
+                        else sign<={new_nowtime,`SHOW_STAN};
                         if(sign_pos_W && !switch_P) begin
                             nxt_state <= `MENU;
                         end else if(sign_pos_X && !switch_P) begin
@@ -340,7 +310,7 @@ module control_module(
                     end
                     `MENU:begin
                         suspend<=1'b0;
-                        sign<={nowtime,`SHOW_MENU};
+                        sign<={new_nowtime,`SHOW_MENU};
                         suspend<=1'b0;
                         if(sign_pos_A && !switch_P)begin
                             nxt_state <= `ONE;
@@ -357,8 +327,7 @@ module control_module(
                     end
                     `ONE:begin
                         suspend<=1'b1;
-                        sign<={nowtime,`SHOW_ONE};
-                        suspend<=1'b1;
+                        sign<={new_nowtime,`SHOW_ONE};
                         if(sign_pos_S && !switch_P)begin
                             nxt_state <= `TWO;
                         end else if(sign_pos_W && !switch_P)begin
@@ -367,8 +336,7 @@ module control_module(
                     end
                     `TWO:begin
                         suspend<=1'b1;
-                        sign<={nowtime,`SHOW_TWO};
-                        suspend<=1'b1;
+                        sign<={new_nowtime,`SHOW_TWO};
                         if(sign_pos_A && !switch_P)begin
                             nxt_state <= `ONE;
                         end else if(sign_pos_W && !switch_P)begin
@@ -431,7 +399,7 @@ module control_module(
                     end
                     `SEARCH:begin
                         suspend<=1'b0;
-                        sign<={nowtime,`SHOW_SEARCH};
+                        sign<={new_nowtime,`SHOW_SEARCH};
                         if(sign_pos_A && !switch_P)begin
                             nxt_state <= `SEARCH_NOWTIME;
                         end else if(sign_pos_X && !switch_P)begin
@@ -446,7 +414,7 @@ module control_module(
                     end
                     `SEARCH_NOWTIME:begin
                         suspend<=1'b0;
-                        if(save_nowtime_yet==1'b0)save_nowtime<=nowtime;
+                        if(save_nowtime_yet==1'b0)save_nowtime<=new_nowtime;
                         sign<={save_nowtime,`SHOW_NOW};
                         if(sign_pos_W && !switch_P)
                             nxt_state <= `SEARCH;
@@ -456,7 +424,7 @@ module control_module(
                     end
                     `SEARCH_WORKTIME:begin
                         suspend<=1'b0;
-                        sign<={worktime,`SHOW_WORKTIME};
+                        sign<={new_worktime,`SHOW_WORKTIME};
                         if(sign_pos_W && !switch_P)
                             nxt_state <= `SEARCH;
                     end
@@ -740,7 +708,7 @@ module control_module(
                     `ERROR:begin
                         suspend<=1'b0;
                         cnt_error<=cnt_error+1;
-                        sign<={nowtime,`SHOW_ERROR};
+                        sign<={new_nowtime,`SHOW_ERROR};
                         if(cnt_error>=200000000)begin
                             nxt_state<=`STANDBY;
                             cnt_error<=0;
@@ -748,7 +716,7 @@ module control_module(
                     end
                     default:begin
                         suspend<=1'b0;
-                        sign<={nowtime,`SHOW_STAN};
+                        sign<={new_nowtime,`SHOW_STAN};
                     end
                 endcase
             end
