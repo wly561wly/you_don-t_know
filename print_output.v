@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "PARAMETER.v" 
+
 module print_output(
     input en,
     input [3:0] sign7,
@@ -19,6 +19,12 @@ module print_output(
 
     reg [24:0] clk_div; 
 
+    parameter [7:0]digit0=8'b11111100, digit1=8'b01100000, digit2=8'b11011010, digit3=8'b11110010, digit4=8'b01100110, digit5=8'b10110110, digit6=8'b10111110, digit7=8'b11100000;
+    parameter [7:0]digit8=8'b11111110, digit9=8'b11110110, digitA=8'b11101110, digitB=8'b00111110, digitC=8'b10011100, digitD=8'b01111010, digitE=8'b10011110, digitF=8'b10001110;
+    
+    //parameter [3:0]sign7=4'b0111,sign6=4'b0110,sign5=4'b0101,sign4=4'b0100,sign3=4'b0011,sign2=4'b0010,sign1=4'b0001,sign0=4'b0000;
+
+    // Set temp varaiables
     reg [7:0]temp7,temp6,temp5,temp4,temp3,temp2,temp1,temp0;
     
     always @(posedge clk or negedge rst) begin
@@ -35,153 +41,131 @@ module print_output(
                 tub_sel <= {tub_sel[6:0], tub_sel[7]};  // Implement digit-move operation here
             end
         end
-        case(en)
-            1'b1:begin
-                case(sign0)
-                    4'b0000: temp0 <= `DIGIT0;
-                    4'b0001: temp0 <= `DIGIT1;
-                    4'b0010: temp0 <= `DIGIT2;
-                    4'b0011: temp0 <= `DIGIT3;
-                    4'b0100: temp0 <= `DIGIT4;
-                    4'b0101: temp0 <= `DIGIT5;
-                    4'b0110: temp0 <= `DIGIT6;
-                    4'b0111: temp0 <= `DIGIT7;
-                    4'b1000: temp0 <= `DIGIT8;
-                    4'b1001: temp0 <= `DIGIT9;
-                    4'b1010: temp0 <= `DIGIT_;
-                    4'b1011: temp0 <= `DIGITU;
-                    4'b1100: temp0 <= `DIGITL;
-                    4'b1110: temp0 <= `DIGITE;
-                    4'b1111: temp0 <= `DIGITF;
-                endcase
-                
-                case(sign1)
-                    4'b0000: temp1 <= `DIGIT0;
-                    4'b0001: temp1 <= `DIGIT1;
-                    4'b0010: temp1 <= `DIGIT2;
-                    4'b0011: temp1 <= `DIGIT3;
-                    4'b0100: temp1 <= `DIGIT4;
-                    4'b0101: temp1 <= `DIGIT5;
-                    4'b0110: temp1 <= `DIGIT6;
-                    4'b0111: temp1 <= `DIGIT7;
-                    4'b1000: temp1 <= `DIGIT8;
-                    4'b1001: temp1 <= `DIGIT9;
-                    4'b1010: temp1 <= `DIGIT_;
-                    4'b1110: temp1 <= `DIGITE;
-                    4'b1011: temp1 <= `DIGITP;
-                    4'b1100: temp1 <= `DIGITC;
-                    4'b1111: temp1 <= `DIGITF;
-                endcase
-                
-                case(sign2)
-                    4'b0000: temp2 <= `DIGIT0;
-                    4'b0001: temp2 <= `DIGIT1;
-                    4'b0010: temp2 <= `DIGIT2;
-                    4'b0011: temp2 <= `DIGIT3;
-                    4'b0100: temp2 <= `DIGIT4;
-                    4'b0101: temp2 <= `DIGIT5;
-                    4'b0110: temp2 <= `DIGIT6;
-                    4'b0111: temp2 <= `DIGIT7;
-                    4'b1000: temp2 <= `DIGIT8;
-                    4'b1001: temp2 <= `DIGIT9;
-                    4'b1010: temp2 <= `DIGITA;
-                endcase
-                
-                case(sign3)
-                    4'b0000: temp3 <= `DIGIT0;
-                    4'b0001: temp3 <= `DIGIT1;
-                    4'b0010: temp3 <= `DIGIT2;
-                    4'b0011: temp3 <= `DIGIT3;
-                    4'b0100: temp3 <= `DIGIT4;
-                    4'b0101: temp3 <= `DIGIT5;
-                    4'b0110: temp3 <= `DIGIT6;
-                    4'b0111: temp3 <= `DIGIT7;
-                    4'b1000: temp3 <= `DIGIT8;
-                    4'b1001: temp3 <= `DIGIT9;
-                    4'b1010: temp3 <= `DIGITA;
-                endcase
-                
-                case(sign4)
-                    4'b0000: temp4 <= `DIGIT0;
-                    4'b0001: temp4 <= `DIGIT1;
-                    4'b0010: temp4 <= `DIGIT2;
-                    4'b0011: temp4 <= `DIGIT3;
-                    4'b0100: temp4 <= `DIGIT4;
-                    4'b0101: temp4 <= `DIGIT5;
-                    4'b0110: temp4 <= `DIGIT6;
-                    4'b0111: temp4 <= `DIGIT7;
-                    4'b1000: temp4 <= `DIGIT8;
-                    4'b1001: temp4 <= `DIGIT9;
-                    4'b1010: temp4 <= `DIGITA;
-                endcase
-                
-                case(sign5)
-                    4'b0000: temp5 <= `DIGIT0;
-                    4'b0001: temp5 <= `DIGIT1;
-                    4'b0010: temp5 <= `DIGIT2;
-                    4'b0011: temp5 <= `DIGIT3;
-                    4'b0100: temp5 <= `DIGIT4;
-                    4'b0101: temp5 <= `DIGIT5;
-                    4'b0110: temp5 <= `DIGIT6;
-                    4'b0111: temp5 <= `DIGIT7;
-                    4'b1000: temp5 <= `DIGIT8; 
-                    4'b1001: temp5 <= `DIGIT9;
-                    4'b1010: temp5 <= `DIGITA;
-                endcase
-                
-                case(sign6)
-                    4'b0000: temp6 <= `DIGIT0;
-                    4'b0001: temp6 <= `DIGIT1;
-                    4'b0010: temp6 <= `DIGIT2;
-                    4'b0011: temp6 <= `DIGIT3;
-                    4'b0100: temp6 <= `DIGIT4;
-                    4'b0101: temp6 <= `DIGIT5;
-                    4'b0110: temp6 <= `DIGIT6;
-                    4'b0111: temp6 <= `DIGIT7;
-                    4'b1000: temp6 <= `DIGIT8;
-                    4'b1001: temp6 <= `DIGIT9;
-                    4'b1010: temp6 <= `DIGITA;
-                endcase
-                
-                case(sign7)
-                    4'b0000: temp7 <= `DIGIT0;
-                    4'b0001: temp7 <= `DIGIT1;
-                    4'b0010: temp7 <= `DIGIT2;
-                    4'b0011: temp7 <= `DIGIT3;
-                    4'b0100: temp7 <= `DIGIT4;
-                    4'b0101: temp7 <= `DIGIT5;
-                    4'b0110: temp7 <= `DIGIT6;
-                    4'b0111: temp7 <= `DIGIT7;
-                    4'b1000: temp7 <= `DIGIT8;
-                    4'b1001: temp7 <= `DIGIT9;
-                    4'b1010: temp7 <= `DIGITA;
-                endcase
-            end
-            1'b0:begin
-                temp0 <= `DIGIT_NULL;
-                temp1 <= `DIGIT_NULL;
-                temp2 <= `DIGIT_NULL;
-                temp3 <= `DIGIT_NULL;
-                temp4 <= `DIGIT_NULL;
-                temp5 <= `DIGIT_NULL;
-                temp6 <= `DIGIT_NULL;
-                temp7 <= `DIGIT_NULL;
-            end
-        endcase
-    end
+        case(sign0)
+        4'b0000: temp0 <= digit0;
+        4'b0001: temp0 <= digit1;
+        4'b0010: temp0 <= digit2;
+        4'b0011: temp0 <= digit3;
+        4'b0100: temp0 <= digit4;
+        4'b0101: temp0 <= digit5;
+        4'b0110: temp0 <= digit6;
+        4'b0111: temp0 <= digit7;
+        4'b1000: temp0 <= digit8;
+        4'b1001: temp0 <= digit9;
+        4'b1010: temp0 <= digitA;
+    endcase
+    
+    case(sign1)
+        4'b0000: temp1 <= digit0;
+        4'b0001: temp1 <= digit1;
+        4'b0010: temp1 <= digit2;
+        4'b0011: temp1 <= digit3;
+        4'b0100: temp1 <= digit4;
+        4'b0101: temp1 <= digit5;
+        4'b0110: temp1 <= digit6;
+        4'b0111: temp1 <= digit7;
+        4'b1000: temp1 <= digit8;
+        4'b1001: temp1 <= digit9;
+        4'b1010: temp1 <= digitA;
+    endcase
+    
+    case(sign2)
+        4'b0000: temp2 <= digit0;
+        4'b0001: temp2 <= digit1;
+        4'b0010: temp2 <= digit2;
+        4'b0011: temp2 <= digit3;
+        4'b0100: temp2 <= digit4;
+        4'b0101: temp2 <= digit5;
+        4'b0110: temp2 <= digit6;
+        4'b0111: temp2 <= digit7;
+        4'b1000: temp2 <= digit8;
+        4'b1001: temp2 <= digit9;
+        4'b1010: temp2 <= digitA;
+    endcase
+    
+    case(sign3)
+        4'b0000: temp3 <= digit0;
+        4'b0001: temp3 <= digit1;
+        4'b0010: temp3 <= digit2;
+        4'b0011: temp3 <= digit3;
+        4'b0100: temp3 <= digit4;
+        4'b0101: temp3 <= digit5;
+        4'b0110: temp3 <= digit6;
+        4'b0111: temp3 <= digit7;
+        4'b1000: temp3 <= digit8;
+        4'b1001: temp3 <= digit9;
+        4'b1010: temp3 <= digitA;
+    endcase
+    
+    case(sign4)
+        4'b0000: temp4 <= digit0;
+        4'b0001: temp4 <= digit1;
+        4'b0010: temp4 <= digit2;
+        4'b0011: temp4 <= digit3;
+        4'b0100: temp4 <= digit4;
+        4'b0101: temp4 <= digit5;
+        4'b0110: temp4 <= digit6;
+        4'b0111: temp4 <= digit7;
+        4'b1000: temp4 <= digit8;
+        4'b1001: temp4 <= digit9;
+        4'b1010: temp4 <= digitA;
+    endcase
+    
+    case(sign5)
+        4'b0000: temp5 <= digit0;
+        4'b0001: temp5 <= digit1;
+        4'b0010: temp5 <= digit2;
+        4'b0011: temp5 <= digit3;
+        4'b0100: temp5 <= digit4;
+        4'b0101: temp5 <= digit5;
+        4'b0110: temp5 <= digit6;
+        4'b0111: temp5 <= digit7;
+        4'b1000: temp5 <= digit8; 
+        4'b1001: temp5 <= digit9;
+        4'b1010: temp5 <= digitA;
+    endcase
+    
+    case(sign6)
+        4'b0000: temp6 <= digit0;
+        4'b0001: temp6 <= digit1;
+        4'b0010: temp6 <= digit2;
+        4'b0011: temp6 <= digit3;
+        4'b0100: temp6 <= digit4;
+        4'b0101: temp6 <= digit5;
+        4'b0110: temp6 <= digit6;
+        4'b0111: temp6 <= digit7;
+        4'b1000: temp6 <= digit8;
+        4'b1001: temp6 <= digit9;
+        4'b1010: temp6 <= digitA;
+    endcase
+    
+    case(sign7)
+        4'b0000: temp7 <= digit0;
+        4'b0001: temp7 <= digit1;
+        4'b0010: temp7 <= digit2;
+        4'b0011: temp7 <= digit3;
+        4'b0100: temp7 <= digit4;
+        4'b0101: temp7 <= digit5;
+        4'b0110: temp7 <= digit6;
+        4'b0111: temp7 <= digit7;
+        4'b1000: temp7 <= digit8;
+        4'b1001: temp7 <= digit9;
+        4'b1010: temp7 <= digitA;
+    endcase
+end
 
-    always @(*)begin
+    always @(*)begin // Use * here
         case (tub_sel)
-            8'b10000000: seg_74 = temp7;
-            8'b01000000: seg_74 = temp6;
-            8'b00100000: seg_74 = temp5;
-            8'b00010000: seg_74 = temp4;
-            8'b00001000: seg_30 = temp3;
-            8'b00000100: seg_30 = temp2;
-            8'b00000010: seg_30 = temp1;
-            8'b00000001: seg_30 = temp0;
+            8'b10000000: seg_74 = temp7; // 显示??1个数码管的数??
+            8'b01000000: seg_74 = temp6; // 显示??2个数码管的数??
+            8'b00100000: seg_74 = temp5; // 显示??3个数码管的数??
+            8'b00010000: seg_74 = temp4; // 显示??4个数码管的数??
+            8'b00001000: seg_30 = temp3; // 显示??5个数码管的数??
+            8'b00000100: seg_30 = temp2; // 显示??6个数码管的数??
+            8'b00000010: seg_30 = temp1; // 显示??7个数码管的数??
+            8'b00000001: seg_30 = temp0; // 显示??8个数码管的数??
             default: begin
-                seg_74 = 8'b00000000;
+                seg_74 = 8'b00000000; // 默认关闭??有数码管
                 seg_30 = 8'b00000000;
             end
         endcase
